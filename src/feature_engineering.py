@@ -120,6 +120,17 @@ class SentimentFeatures:
             df['news_count_ma_7'] = df['news_count'].rolling(window=7).mean()
             df['news_intensity'] = df['news_count'] / df['news_count'].rolling(window=30).mean()
         return df
+    
+    @staticmethod
+    def add_sentiment_ema(df: pd.DataFrame, column: str = 'sentiment_score', span: int = 5) -> pd.DataFrame:
+        """
+        Adds Exponential Moving Average to sentiment to create a 'memory' of news 
+        that decays over time rather than disappearing on no-news days.
+        """
+        if column in df.columns:
+            # fillna(0) ensures the calculation starts even if the first row is empty
+            df[f'{column}_ema'] = df[column].fillna(0).ewm(span=span, adjust=False).mean()
+        return df
 
 
 class MarketFeatures:
@@ -178,6 +189,7 @@ class MarketFeatures:
 
 class TemporalFeatures:
     """Create time-based features."""
+
     
     @staticmethod
     def add_date_features(df: pd.DataFrame, date_column: str = 'Date') -> pd.DataFrame:
@@ -253,6 +265,7 @@ class FeatureEngineer:
                 df = self.sentiment.add_momentum_features(df)
                 df = self.sentiment.add_volatility_features(df)
                 df = self.sentiment.add_news_count_features(df)
+                df = self.sentiment.add_sentiment_ema(df)
             
             # Market features
             logger.info("Adding market features")
@@ -267,7 +280,8 @@ class FeatureEngineer:
             df = self.temporal.add_cyclical_features(df)
             
             # Create target variable
-            df['Target'] = (df['Close'].shift(-1) > df['Close']).astype(int)
+            threshold = 0.002 
+            df['Target'] = (df['returns'].shift(-1) > threshold).astype(int)
             
             # Drop rows with NaN values
             df_clean = df.dropna()

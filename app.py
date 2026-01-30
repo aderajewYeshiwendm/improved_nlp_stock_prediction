@@ -9,6 +9,8 @@ from plotly.subplots import make_subplots
 import yaml
 from pathlib import Path
 from datetime import datetime, timedelta
+from sklearn.preprocessing import MinMaxScaler
+
 
 from src.data_loader import EnhancedDataLoader
 from src.sentiment import apply_sentiment_analysis
@@ -190,13 +192,14 @@ if run_analysis and data_source:
         status_text.text("Training models...")
         progress_bar.progress(80)
         
-        feature_cols = [col for col in full_df_features.columns 
-                       if col not in ['Date', 'Target', 'Dividends', 'Stock Splits']]
+        feature_cols = [
+                    'Close', 'Volume', 'RSI', 'MACD', 'sentiment_score', 
+                    'sentiment_score_lag_1', 'returns', 'ATR', 'SMA_50', 'SMA_200'
+                ]
         
         X_train, X_val, X_test, y_train, y_val, y_test = trainer.prepare_data(
             full_df_features, feature_cols, test_size=0.2, val_size=0.1
         )
-        from sklearn.preprocessing import MinMaxScaler
         scaler = MinMaxScaler()
 
         X_train = scaler.fit_transform(X_train)
