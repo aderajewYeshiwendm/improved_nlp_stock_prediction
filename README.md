@@ -1,4 +1,4 @@
-# 📈 Enhanced NLP-Based Stock Prediction System
+# 📈 NLP-Based Stock Prediction and Sentiment Analysis System
 
 ## 🎯 Project Overview
 
@@ -127,7 +127,6 @@ improved_nlp_stock_prediction/
 │   ├── model.py                 # ML model training (XGB, LGBM, LSTM)
 │
 ├── data/
-│   ├── raw/                     # Raw data files
 │
 │
 ├── app.py                       # Streamlit dashboard
@@ -223,100 +222,6 @@ Comprehensive metrics:
 
 ---
 
-## 📈 Usage Examples
-
-### Basic Usage
-
-```python
-from src.data_loader import EnhancedDataLoader
-from src.feature_engineering import FeatureEngineer
-from src.model import ModelTrainer
-
-# Load configuration
-import yaml
-with open('config/config.yaml') as f:
-    config = yaml.safe_load(f)
-
-# Load data
-loader = EnhancedDataLoader(config)
-news_df = loader.load_fnspid_data('data/fnspid_sample.csv', ticker='AAPL')
-market_df = loader.fetch_market_data('AAPL', '2020-01-01', '2021-12-31')
-merged_df = loader.merge_datasets(news_df, market_df)
-
-# Feature engineering
-engineer = FeatureEngineer(config)
-df_with_features = engineer.create_all_features(merged_df)
-
-# Train models
-trainer = ModelTrainer(config)
-feature_cols = engineer.get_feature_names()
-X_train, X_val, X_test, y_train, y_val, y_test = trainer.prepare_data(
-    df_with_features, feature_cols
-)
-
-# Train XGBoost
-xgb_model = trainer.train_xgboost(X_train, X_val, y_train, y_val)
-xgb_preds = xgb_model.predict(X_test)
-xgb_metrics = trainer.evaluate_model(y_test, xgb_preds, model_name="XGBoost")
-
-# Train ensemble
-ensemble_results = trainer.create_ensemble(X_test, y_test)
-```
-
-### Multi-Ticker Analysis
-
-```python
-tickers = ['AAPL', 'TSLA', 'MSFT', 'GOOGL']
-results = loader.load_multiple_tickers(
-    tickers, '2020-01-01', '2021-12-31', 'data/fnspid_sample.csv'
-)
-
-for ticker, (news, market) in results.items():
-    print(f"Processing {ticker}")
-    # Process each ticker...
-```
-
----
-
-## 🔧 Advanced Configuration
-
-### Model Hyperparameters
-
-Edit `config/config.yaml`:
-
-```yaml
-model:
-  xgboost:
-    n_estimators: 200
-    learning_rate: 0.05
-    max_depth: 6
-    
-  lstm:
-    hidden_size: 128
-    num_layers: 2
-    dropout: 0.3
-```
-
-### Feature Selection
-
-Choose which features to include:
-
-```yaml
-features:
-  technical:
-    - rsi
-    - macd
-    - bollinger_bands
-  sentiment:
-    - sentiment_score
-    - sentiment_lag_1
-    - sentiment_ma_7
-```
-
----
-
-## 📊 Performance Benchmarks
-
 
 ## 📚 References
 
@@ -344,19 +249,4 @@ This project is licensed under the MIT License.
 - Addis Ababa University, College of Technology and Built Environment
 - School of Information Technology and Engineering
 - ProsusAI for the FinBERT model
-
----
-
-## 🔮 Future Enhancements
-
-- [ ] Real-time news streaming and prediction
-- [ ] Multi-modal analysis (news + social media + technical)
-- [ ] Transformer-based time series models
-- [ ] Attention mechanisms for news importance
-- [ ] Portfolio optimization framework
-- [ ] Risk management system
-- [ ] Automated trading integration
-- [ ] Web application deployment
-- [ ] Mobile app interface
-
 ---
