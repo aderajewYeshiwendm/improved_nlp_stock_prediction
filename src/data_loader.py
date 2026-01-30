@@ -266,31 +266,40 @@ class EnhancedDataLoader:
         # Handle different aggregation methods
         if aggregation == 'mean':
             daily_sentiment = news_df.groupby('Date')['sentiment_score'].mean()
+
         elif aggregation == 'weighted':
             # Weight by absolute sentiment (stronger signals matter more)
             news_df['weight'] = news_df['sentiment_score'].abs()
+
             daily_sentiment = (
-                news_df.groupby('Date')
-                .apply(lambda x: np.average(x['sentiment_score'], weights=x['weight']))
+                news_df
+                .groupby('Date', group_keys=False)
+                .apply(
+                    lambda x: np.average(x['sentiment_score'], weights=x['weight']),
+                    include_groups=False
+                )
+                .rename('sentiment_score')
             )
+
         elif aggregation == 'max':
             # Use the strongest sentiment of the day
             daily_sentiment = news_df.groupby('Date')['sentiment_score'].apply(
-                lambda x: x.iloc[x.abs().idxmax()] if len(x) > 0 else 0
+                lambda x: x.loc[x.abs().idxmax()] if len(x) > 0 else 0
             )
+
         elif aggregation == 'last':
             # Use the last sentiment of the day
             daily_sentiment = news_df.groupby('Date')['sentiment_score'].last()
+
         else:
             raise ValueError(f"Unknown aggregation method: {aggregation}")
-        
+
         daily_sentiment = daily_sentiment.reset_index()
-        
+
         # Add news count
         news_count = news_df.groupby('Date').size().reset_index(name='news_count')
         daily_sentiment = daily_sentiment.merge(news_count, on='Date', how='left')
-        
-        # Merge with market data
+
         merged_df = pd.merge(market_df, daily_sentiment, on='Date', how='left')
         
         # Fill missing sentiment with 0 (neutral)

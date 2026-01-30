@@ -2,6 +2,7 @@ import re
 import spacy
 import os
 
+
 class FinancialPreprocessor:
     def __init__(self):
         try:

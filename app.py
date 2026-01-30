@@ -1,3 +1,4 @@
+import torch
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -195,7 +196,13 @@ if run_analysis and data_source:
         X_train, X_val, X_test, y_train, y_val, y_test = trainer.prepare_data(
             full_df_features, feature_cols, test_size=0.2, val_size=0.1
         )
-        
+        from sklearn.preprocessing import MinMaxScaler
+        scaler = MinMaxScaler()
+
+        X_train = scaler.fit_transform(X_train)
+        X_val = scaler.transform(X_val)
+        X_test = scaler.transform(X_test)
+
         # Train selected models
         results = {}
         if 'XGBoost' in model_selection:
@@ -207,7 +214,37 @@ if run_analysis and data_source:
             lgbm_model = trainer.train_lightgbm(X_train, X_val, y_train, y_val)
             lgbm_preds = lgbm_model.predict(X_test)
             results['LightGBM'] = trainer.evaluate_model(y_test, lgbm_preds, model_name="LightGBM")
-        
+
+        # Train LSTM
+        if 'LSTM' in model_selection:   
+            lstm_model = trainer.train_lstm(X_train, X_val, y_train, y_val)
+            
+            # Create LSTM predictions for test set
+            lstm_preds = []
+            seq_len = 30
+            lstm_model.eval()
+            with torch.no_grad():
+                for i in range(seq_len, len(X_test)):
+                    seq = X_test[i-seq_len:i]
+                    seq_tensor = torch.FloatTensor(seq).unsqueeze(0).to(trainer.device)
+                    pred = lstm_model(seq_tensor).cpu().numpy()[0][0]
+                    lstm_preds.append(int(pred > 0.5))
+
+            # Pad beginning
+            lstm_preds = [0] * seq_len + lstm_preds
+            results['LSTM'] = trainer.evaluate_model(y_test, lstm_preds, model_name="LSTM")
+
+        # Ensemble model
+        if 'Ensemble' in model_selection:
+            ensemble_result = trainer.create_ensemble(X_test, y_test)
+            ensemble_preds = ensemble_result['predictions']
+            
+            results['Ensemble'] = trainer.evaluate_model(
+                y_test, ensemble_preds, 
+                ensemble_result['probabilities'],
+                model_name="Ensemble"
+            )
+
         progress_bar.progress(100)
         status_text.text("Analysis complete!")
         

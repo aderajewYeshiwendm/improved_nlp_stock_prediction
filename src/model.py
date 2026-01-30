@@ -15,6 +15,7 @@ from torch.utils.data import Dataset, DataLoader
 from loguru import logger
 import joblib
 from pathlib import Path
+from sklearn.preprocessing import MinMaxScaler
 
 
 class LSTMModel(nn.Module):
@@ -49,7 +50,7 @@ class LSTMModel(nn.Module):
 class TimeSeriesDataset(Dataset):
     """Dataset for time series data."""
     
-    def __init__(self, X, y, sequence_length=30):
+    def __init__(self, X, y, sequence_length=10):
         self.X = X
         self.y = y
         self.sequence_length = sequence_length
@@ -165,17 +166,25 @@ class ModelTrainer:
     def train_lstm(
         self,
         X_train, X_val, y_train, y_val,
-        sequence_length: int = 30,
+        sequence_length: int = 10,
         hidden_size: int = 128,
         num_layers: int = 2,
         dropout: float = 0.3,
-        epochs: int = 50,
+        epochs: int = 10,
         batch_size: int = 64,
         learning_rate: float = 0.001
     ) -> LSTMModel:
         """Train LSTM model."""
         logger.info("Training LSTM model")
+
+        if len(X_train) <= sequence_length or len(X_val) <= sequence_length:
+            logger.warning("Not enough data for LSTM training. Skipping LSTM.")
+            return None
         
+        scaler = MinMaxScaler()
+
+        X_train = scaler.fit_transform(X_train)
+        X_val = scaler.transform(X_val)
         # Create datasets
         train_dataset = TimeSeriesDataset(X_train, y_train, sequence_length)
         val_dataset = TimeSeriesDataset(X_val, y_val, sequence_length)
@@ -258,7 +267,7 @@ class ModelTrainer:
         
         if 'lstm' in self.models:
             # Need to create sequences for LSTM
-            sequence_length = 30
+            sequence_length = 10
             lstm_predictions = []
             
             self.models['lstm'].eval()
