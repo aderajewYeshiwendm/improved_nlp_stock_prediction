@@ -1,0 +1,164 @@
+# config/config.yaml
+# Configuration for NLP Stock Prediction System
+
+# Data Configuration
+data:
+  fnspid_path: "data/fnspid_sample.csv"
+  cache_dir: "data/cache"
+  output_dir: "data/output"
+  max_rows: null  # null means load all data
+  sample_size: null  # For testing, set to a smaller number
+  
+# Model Configuration
+model:
+  # Sentiment Analysis
+  sentiment:
+    model_name: "ProsusAI/finbert"
+    batch_size: 32
+    max_length: 512
+    device: "auto"  # auto, cuda, cpu
+    
+  # Prediction Models
+  prediction:
+    models:
+      - xgboost
+      - lightgbm
+      - lstm
+      - ensemble
+    
+    xgboost:
+      n_estimators: 200
+      learning_rate: 0.05
+      max_depth: 6
+      min_child_weight: 1
+      gamma: 0
+      subsample: 0.8
+      colsample_bytree: 0.8
+      random_state: 42
+      
+    lightgbm:
+      n_estimators: 200
+      learning_rate: 0.05
+      max_depth: 6
+      num_leaves: 31
+      min_child_samples: 20
+      random_state: 42
+      
+    lstm:
+      hidden_size: 128
+      num_layers: 2
+      dropout: 0.3
+      learning_rate: 0.001
+      epochs: 50
+      batch_size: 64
+      sequence_length: 30
+      
+# Feature Engineering
+features:
+  # Technical Indicators
+  technical:
+    - rsi
+    - macd
+    - macd_signal
+    - macd_diff
+    - bollinger_bands
+    - atr
+    - obv
+    - ema_12
+    - ema_26
+    - sma_50
+    - sma_200
+    
+  # Sentiment Features
+  sentiment:
+    - sentiment_score
+    - sentiment_lag_1
+    - sentiment_lag_2
+    - sentiment_lag_3
+    - sentiment_ma_7
+    - sentiment_ma_30
+    - sentiment_volatility
+    - sentiment_momentum
+    
+  # Market Features
+  market:
+    - returns
+    - log_returns
+    - volume_change
+    - high_low_spread
+    - open_close_spread
+    
+  # Time Features
+  temporal:
+    - day_of_week
+    - month
+    - quarter
+    - is_month_start
+    - is_month_end
+    - is_quarter_end
+
+# Training Configuration
+training:
+  test_size: 0.2
+  validation_size: 0.1
+  cv_folds: 5
+  shuffle: false  # Time series data should not be shuffled
+  
+  # Hyperparameter Tuning
+  tune_hyperparameters: false
+  tuning_trials: 50
+  
+  # Early Stopping
+  early_stopping: true
+  patience: 10
+  
+# Evaluation Configuration
+evaluation:
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1_score
+    - roc_auc
+    - sharpe_ratio
+    - max_drawdown
+    - win_rate
+    
+  # Backtesting
+  backtesting:
+    enabled: true
+    initial_capital: 100000
+    commission: 0.001
+    slippage: 0.0005
+    
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_to_file: true
+  log_dir: "logs"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} - {message}"
+  
+# MLflow Configuration
+mlflow:
+  enabled: true
+  tracking_uri: "mlruns"
+  experiment_name: "stock_prediction"
+  
+# Streamlit Configuration
+streamlit:
+  page_title: "Financial NLP Dashboard"
+  page_icon: "📈"
+  layout: "wide"
+  initial_sidebar_state: "expanded"
+  
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
+  
+# Defaults
+defaults:
+  ticker: "AA"
+  start_date: "2010-06-10"
+  end_date: "2021-03-09"
