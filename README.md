@@ -22,8 +22,8 @@ This is NLP-based financial news sentiment analysis system for predicting stock 
 │                     Data Ingestion Layer                    │
 │  ┌──────────────┐  ┌──────────────┐       │
 │  │  FNSPID News │  │  yFinance    │  
-│  │   Dataset    │  │   Market     │  │    │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│  │   Dataset    │  │   Market     │  
+│  └──────────────┘  └──────────────┘      │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
