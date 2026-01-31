@@ -20,9 +20,9 @@ This is NLP-based financial news sentiment analysis system for predicting stock 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     Data Ingestion Layer                    │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │  FNSPID News │  │  yFinance    │  │  Custom Data │     │
-│  │   Dataset    │  │   Market     │  │    Sources   │     │
+│  ┌──────────────┐  ┌──────────────┐       │
+│  │  FNSPID News │  │  yFinance    │  
+│  │   Dataset    │  │   Market     │  │    │
 │  └──────────────┘  └──────────────┘  └──────────────┘     │
 └─────────────────────────────────────────────────────────────┘
                               ↓
@@ -66,10 +66,10 @@ This is NLP-based financial news sentiment analysis system for predicting stock 
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │               Visualization & Serving Layer                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │  Streamlit   │  │   FastAPI    │  │   MLflow     │     │
-│  │  Dashboard   │  │  REST API    │  │  Tracking    │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│  ┌──────────────┐      │
+│  │  Streamlit   │      │
+│  │  Dashboard   │       │
+│  └──────────────┘       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
